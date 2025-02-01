@@ -223,26 +223,27 @@ class TailImgRec(LightningModule):
         seq_rep_img = self.item_emb_img(seq_img)
         rep_seq = self.pre_imgseqrec_model(seq_rep_img, masks)
         prod = self.pred_layer(rep_seq)
-    
-        ## plenty for items
+        """
+        ## enty for items
         plenty_term = torch.softmax(self.plenty/self.tau, dim=0)
         _, ind_pre = torch.topk(prod, k=5)
         count = (1-(batch['label_id'].long().unsqueeze(1) == ind_pre).float().sum(dim=-1).to(prod.device))
         tailitem_seq_id = torch.where(batch['cold_item_flag']==1)
         self.plenty[batch['label_id'][tailitem_seq_id]] += count[tailitem_seq_id]
         loss = self.loss_ce_raw(prod*plenty_term.unsqueeze(0), batch['label_id'].long())
-        
+        """
         
         ## plenty for sequences
-        # loss = self.loss_ce(prod, batch['label_id'].long())
-        # if batch['cold_item_flag'].sum() == 0:
-        #     plenty_term = 1 
-        # else:
-        #     plenty_term = torch.softmax(batch['plenty']/self.tau, dim=0)
+        loss = self.loss_ce(prod, batch['label_id'].long())
+        if batch['cold_item_flag'].sum() == 0:
+            plenty_term = 1 
+        else:
+            plenty_term = torch.softmax(batch['plenty']/self.tau, dim=0)
+            
         #     _, ind_pre = torch.topk(prod, k=5)
         #     count = (batch['label_id'].long().unsqueeze(1) == ind_pre).float().sum(dim=-1).to(prod.device)
         #     batch['plenty'] += batch['cold_item_flag'] * count
-        # loss = (plenty_term * loss).mean()
+        loss = (plenty_term * loss).mean()
         
         self.log("train_loss", loss.item(),  on_epoch=False, prog_bar=True, logger=True)
         if self.trainer.global_rank == 0 and self.global_step == 100:
