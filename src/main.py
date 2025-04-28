@@ -343,6 +343,7 @@ class TailImgRec(LightningModule):
         self.log("Recall@10", test_metrics_dict_mean['Recall@10'])
         self.logger_save.info("Test Metrics: {}".format(test_metrics_dict_mean))
         self.logger_save.info("Recall@10: {}".format(test_metrics_dict_mean['Recall@10']))
+        quit()
         
 
 def main():
