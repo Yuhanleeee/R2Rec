@@ -224,7 +224,7 @@ class TailImgRec(LightningModule):
         rep_seq = self.pre_imgseqrec_model(seq_rep_img, masks)
         prod = self.pred_layer(rep_seq)
         """
-        ## enty for items
+        ## plenty for items
         plenty_term = torch.softmax(self.plenty/self.tau, dim=0)
         _, ind_pre = torch.topk(prod, k=5)
         count = (1-(batch['label_id'].long().unsqueeze(1) == ind_pre).float().sum(dim=-1).to(prod.device))
@@ -238,11 +238,11 @@ class TailImgRec(LightningModule):
         if batch['cold_item_flag'].sum() == 0:
             plenty_term = 1 
         else:
-            plenty_term = torch.softmax(batch['plenty']/self.tau, dim=0)
-            
+            plenty_term = torch.softmax(batch['plenty']/self.tau, dim=0) 
         #     _, ind_pre = torch.topk(prod, k=5)
         #     count = (batch['label_id'].long().unsqueeze(1) == ind_pre).float().sum(dim=-1).to(prod.device)
         #     batch['plenty'] += batch['cold_item_flag'] * count
+        
         loss = (plenty_term * loss).mean()
         
         self.log("train_loss", loss.item(),  on_epoch=False, prog_bar=True, logger=True)
